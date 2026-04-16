@@ -1,0 +1,3 @@
+start
+
+I am a CSE student. I want to build a [Stock Portfolio Tracker / Student Study App]. Please build a basic React frontend with a dark theme and a Node.js backend that connects to MongoDB. I need a login page and a dashboard.
