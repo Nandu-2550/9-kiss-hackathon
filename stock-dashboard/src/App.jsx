@@ -4,10 +4,15 @@ import { Line, LineChart, ResponsiveContainer } from 'recharts'
 import { Toaster, toast } from 'react-hot-toast'
 
 function App() {
-  const AUTH_API_BASE_URL = 'http://localhost:5000/api/auth'
-  const API_BASE_URL = 'http://localhost:5000/api/watchlist'
-  const MARKET_API_BASE_URL = 'http://localhost:5000/api/market'
-  const AI_SUMMARY_API_URL = 'http://localhost:5000/api/ai-summary'
+  const API_ROOT = (
+    import.meta.env.PROD
+      ? (import.meta.env.VITE_API_BASE_URL || '')
+      : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000')
+  ).replace(/\/$/, '')
+  const AUTH_API_BASE_URL = `${API_ROOT}/api/auth`
+  const API_BASE_URL = `${API_ROOT}/api/watchlist`
+  const MARKET_API_BASE_URL = `${API_ROOT}/api/market`
+  const AI_SUMMARY_API_URL = `${API_ROOT}/api/ai-summary`
   const [clickCount, setClickCount] = useState(0)
   const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [user, setUser] = useState(() => {
