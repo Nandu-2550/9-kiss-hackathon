@@ -10,19 +10,29 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/stock_
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 const FRONTEND_URL = process.env.FRONTEND_URL || '';
 
+const normalizeOrigin = (value) => value.trim().replace(/\/+$/, '');
+
 const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
-]);
+].map(normalizeOrigin));
+const allowedOriginPatterns = [];
 
 if (FRONTEND_URL) {
   FRONTEND_URL
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => normalizeOrigin(origin))
     .filter(Boolean)
-    .forEach((origin) => allowedOrigins.add(origin));
+    .forEach((origin) => {
+      if (origin.includes('*')) {
+        const escaped = origin.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+        allowedOriginPatterns.push(new RegExp(`^${escaped}$`));
+        return;
+      }
+      allowedOrigins.add(origin);
+    });
 }
 
 app.use(
@@ -32,7 +42,11 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (allowedOrigins.has(origin)) {
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.has(normalizedOrigin)) {
+        return callback(null, true);
+      }
+      if (allowedOriginPatterns.some((pattern) => pattern.test(normalizedOrigin))) {
         return callback(null, true);
       }
       return callback(new Error('Not allowed by CORS'));
